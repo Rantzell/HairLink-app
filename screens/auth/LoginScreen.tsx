@@ -104,7 +104,7 @@ export default function LoginScreen({
     };
 
     const handleVerifyResetCode = async () => {
-        if (forgotOtp.length !== 8) { setForgotError("Please enter the complete 8-digit code."); return; }
+        if (forgotOtp.length !== 6) { setForgotError("Please enter the complete 6-digit code."); return; }
         setForgotLoading(true);
         setForgotError("");
         
@@ -130,7 +130,7 @@ export default function LoginScreen({
 
                         <Animated.Text entering={FadeInUp.delay(200)} style={styles.premiumTitle}>Forgot Password?</Animated.Text>
                         <Animated.Text entering={FadeInUp.delay(300)} style={styles.premiumSubtitle}>
-                            Enter your email address and we'll send an 8-digit code to reset your password.
+                            Enter your email address and we'll send a 6-digit code to reset your password.
                         </Animated.Text>
 
                         <Animated.View entering={FadeInUp.delay(500)} style={styles.premiumCard}>
@@ -182,7 +182,7 @@ export default function LoginScreen({
 
                         <Animated.Text entering={FadeInUp.delay(200)} style={styles.premiumTitle}>Verify Code</Animated.Text>
                         <Animated.Text entering={FadeInUp.delay(300)} style={styles.premiumSubtitle}>
-                            We've sent an 8-digit code to <Text style={{fontWeight: '900', color: '#fff'}}>{forgotEmail}</Text>
+                            We've sent a 6-digit code to <Text style={{fontWeight: '900', color: '#fff'}}>{forgotEmail}</Text>
                         </Animated.Text>
 
                         <Animated.View 
@@ -190,14 +190,14 @@ export default function LoginScreen({
                             entering={FadeInUp.delay(500)} 
                             style={styles.premiumCard}
                         >
-                            <Text style={styles.cardInfoLabel}>ENTER 8-DIGIT CODE</Text>
+                            <Text style={styles.cardInfoLabel}>ENTER 6-DIGIT CODE</Text>
 
                             <TouchableOpacity
                                 activeOpacity={1}
                                 onPress={() => otpInputRef.current?.focus()}
                                 style={styles.otpBoxesRow}
                             >
-                                {Array.from({ length: 8 }).map((_, i) => {
+                                {Array.from({ length: 6 }).map((_, i) => {
                                     const isActive = forgotOtp.length === i;
                                     const isFilled = forgotOtp.length > i;
                                     return (
@@ -221,10 +221,10 @@ export default function LoginScreen({
                                 value={forgotOtp}
                                 onChangeText={(text) => {
                                     setForgotError("");
-                                    setForgotOtp(text.replace(/[^0-9]/g, "").slice(0, 8));
+                                    setForgotOtp(text.replace(/[^0-9]/g, "").slice(0, 6));
                                 }}
                                 keyboardType="number-pad"
-                                maxLength={8}
+                                maxLength={6}
                                 style={styles.hiddenInput}
                                 autoFocus
                             />
@@ -232,9 +232,9 @@ export default function LoginScreen({
                             {forgotError ? <Text style={[styles.fieldError, { textAlign: 'center', width: '100%', marginTop: 10 }]}>{forgotError}</Text> : <View style={{ height: 20 }} />}
 
                             <TouchableOpacity 
-                                style={[styles.primaryBtn, { marginTop: 15, opacity: forgotOtp.length < 8 ? 0.7 : 1 }]} 
+                                style={[styles.primaryBtn, { marginTop: 15, opacity: forgotOtp.length < 6 ? 0.7 : 1 }]} 
                                 onPress={handleVerifyResetCode} 
-                                disabled={forgotLoading || forgotOtp.length < 8}
+                                disabled={forgotLoading || forgotOtp.length < 6}
                             >
                                 {forgotLoading ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryBtnText}>Verify and continue</Text>}
                             </TouchableOpacity>

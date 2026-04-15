@@ -5,11 +5,11 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  StatusBar,
   Dimensions,
   FlatList,
   Modal,
 } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { s, vs, ms } from '../../lib/scaling';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -183,7 +183,7 @@ export default function RecipientCalendarScreen({ onBack }: { onBack?: () => voi
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar style="light" />
       
       {/* ── Premium Purple Gradient Header ────────────────── */}
       <LinearGradient

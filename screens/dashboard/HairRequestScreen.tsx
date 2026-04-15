@@ -7,10 +7,10 @@ import {
   TouchableOpacity,
   TextInput,
   Image,
-  StatusBar,
   Alert,
   ActivityIndicator,
 } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { s, vs, ms } from '../../lib/scaling';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -176,7 +176,7 @@ export default function HairRequestScreen({ onBack, onSuccess }: HairRequestScre
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar style="light" />
       
       {/* ── Elite Header ──────────────────────────────── */}
       <LinearGradient

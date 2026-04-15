@@ -11,6 +11,7 @@ import {
   TextInput,
   Linking,
 } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { s, vs, ms } from '../../lib/scaling';
 import { Ionicons, MaterialCommunityIcons, Feather } from '@expo/vector-icons';
@@ -181,7 +182,7 @@ export default function RecipientDashboard({ onLogout, onRoleChange, userName = 
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar style="light" />
       {/* ── Header ─────────────────────────────────── */}
       <Animated.View entering={FadeIn.duration(400)}>
         <LinearGradient

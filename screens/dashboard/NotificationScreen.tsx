@@ -7,10 +7,10 @@ import {
   TouchableOpacity,
   TextInput,
   Image,
-  StatusBar,
   RefreshControl,
   ActivityIndicator,
 } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { s, vs, ms } from '../../lib/scaling';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -181,7 +181,7 @@ export default function NotificationScreen({ onBack, role = 'Donor' }: { onBack?
 
   return (
     <View style={[styles.container, { backgroundColor: themeBg }]}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar style="light" />
       
       {/* ── Premium Gradient Header ────────────────── */}
       <LinearGradient

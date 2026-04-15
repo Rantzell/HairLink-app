@@ -10,9 +10,9 @@ import {
     Alert,
     ActivityIndicator,
     Platform,
-    StatusBar,
     Dimensions,
 } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { s, vs, ms } from '../../lib/scaling';
 import { Ionicons, MaterialCommunityIcons, Feather, FontAwesome5 } from '@expo/vector-icons';
@@ -323,7 +323,7 @@ export default function ProfileScreen({ onBack, onLogout, onRoleChange }: Profil
 
     return (
         <View style={styles.container}>
-            <StatusBar barStyle="light-content" />
+            <StatusBar style="light" />
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
                 {/* Header Hero Section */}
                 <LinearGradient

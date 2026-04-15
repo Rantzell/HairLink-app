@@ -71,8 +71,8 @@ export default function VerificationScreen({
     }, [timer, canResend]);
 
     const handleVerify = async () => {
-        if (otp.length !== 8) {
-            setError("Please enter all 8 digits.");
+        if (otp.length !== 6) {
+            setError("Please enter all 6 digits.");
             return;
         }
         setError("");
@@ -164,7 +164,7 @@ export default function VerificationScreen({
                             }}
                         >
                             <Text style={{ fontSize: 13, fontWeight: "800", color: "#BBB", marginBottom: 25, letterSpacing: 2 }}>
-                                ENTER 8-DIGIT CODE
+                                ENTER 6-DIGIT CODE
                             </Text>
 
                             {/* OTP Boxes Rendering */}
@@ -173,7 +173,7 @@ export default function VerificationScreen({
                                 onPress={() => otpInputRef.current?.focus()}
                                 style={{ flexDirection: "row", alignItems: "center", marginBottom: 10 }}
                             >
-                                {Array.from({ length: 8 }).map((_, i) => {
+                                {Array.from({ length: 6 }).map((_, i) => {
                                     const isActive = otp.length === i;
                                     const isFilled = otp.length > i;
                                     return (
@@ -201,10 +201,10 @@ export default function VerificationScreen({
                                 value={otp}
                                 onChangeText={(text) => {
                                     setError("");
-                                    setOtp(text.replace(/[^0-9]/g, "").slice(0, 8));
+                                    setOtp(text.replace(/[^0-9]/g, "").slice(0, 6));
                                 }}
                                 keyboardType="number-pad"
-                                maxLength={8}
+                                maxLength={6}
                                 style={{ position: "absolute", opacity: 0, height: 0, width: 0 }}
                                 autoFocus
                             />
@@ -219,17 +219,17 @@ export default function VerificationScreen({
                             <TouchableOpacity
                                 activeOpacity={0.8}
                                 onPress={handleVerify}
-                                disabled={loading || otp.length < 8}
+                                disabled={loading || otp.length < 6}
                                 style={{
                                     width: "100%", height: 58, borderRadius: 20,
-                                    backgroundColor: otp.length < 8 ? "#FFD6EF" : "#FF1493",
+                                    backgroundColor: otp.length < 6 ? "#FFD6EF" : "#FF1493",
                                     justifyContent: "center", alignItems: "center",
                                     marginTop: 15,
                                     shadowColor: "#FF1493",
                                     shadowOffset: { width: 0, height: 10 },
-                                    shadowOpacity: otp.length < 8 ? 0 : 0.3,
+                                    shadowOpacity: otp.length < 6 ? 0 : 0.3,
                                     shadowRadius: 15,
-                                    elevation: otp.length < 8 ? 0 : 8,
+                                    elevation: otp.length < 6 ? 0 : 8,
                                 }}
                             >
                                 {loading ? (
