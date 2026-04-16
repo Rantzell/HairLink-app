@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { StatusBar } from 'expo-status-bar';
 import ProfileScreen from './ProfileScreen';
 import {
   View,
@@ -11,7 +12,6 @@ import {
   TextInput,
   Linking,
 } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { s, vs, ms } from '../../lib/scaling';
 import { Ionicons, MaterialCommunityIcons, Feather } from '@expo/vector-icons';
@@ -203,7 +203,8 @@ export default function RecipientDashboard({ onLogout, onRoleChange, userName = 
       </Animated.View>
 
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        style={{ width: '100%' }}
+        contentContainerStyle={[styles.scrollContent, { alignItems: 'stretch' }]}
         showsVerticalScrollIndicator={false}
       >
         {/* ── Hero ──────────────────────────────────── */}

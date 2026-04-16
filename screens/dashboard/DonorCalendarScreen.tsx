@@ -103,26 +103,40 @@ export default function DonorCalendarScreen({ onBack }: { onBack?: () => void })
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
-      const { data, error } = await supabase
-        .from('donations')
-        .select('*')
-        .eq('user_id', session.user.id);
+      // Fetch both donations and monetary donations
+      const [hairResult, monetaryResult] = await Promise.all([
+        supabase.from('donations').select('*').eq('user_id', session.user.id),
+        supabase.from('monetary_donations').select('*').eq('user_id', session.user.id)
+      ]);
 
-      if (error) throw error;
+      if (hairResult.error) throw hairResult.error;
+      if (monetaryResult.error) throw monetaryResult.error;
 
-      // Map donations to Events
-      const mapped: Event[] = (data || []).map((d: any) => ({
+      // Map hair donations
+      const hairMapped: Event[] = (hairResult.data || []).map((d: any) => ({
         id: d.id,
-        title: d.type === 'hair' ? 'Hair Donation' : `Monetary Donation (₱${d.amount})`,
-        location: d.type === 'hair' ? 'Strand-by-Strand' : 'Financial Contribution',
+        title: 'Hair Donation',
+        location: 'Strand-by-Strand',
         time: new Date(d.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         date: d.created_at.split('T')[0],
-        type: d.type === 'hair' ? 'drive' : 'other', 
+        type: 'drive', 
         accepted: d.status === 'approved',
         status: d.status
       }));
 
-      setEvents(mapped); // Removing mock events for a cleaner real-time experience
+      // Map monetary donations
+      const monetaryMapped: Event[] = (monetaryResult.data || []).map((m: any) => ({
+        id: m.id,
+        title: `Monetary Donation (₱${m.amount})`,
+        location: m.payment_method || 'Financial Contribution',
+        time: m.created_at ? new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '---',
+        date: m.created_at ? m.created_at.split('T')[0] : '---',
+        type: 'other', 
+        accepted: m.status === 'approved',
+        status: m.status
+      }));
+
+      setEvents([...hairMapped, ...monetaryMapped]);
     } catch (err) {
       console.error("Error fetching donations:", err);
     } finally {

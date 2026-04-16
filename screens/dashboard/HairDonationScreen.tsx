@@ -59,7 +59,7 @@ export default function HairDonationScreen({ onBack, onSuccess }: HairDonationSc
             } as any);
 
             const { data, error } = await supabase.storage
-                .from('hair-requests') // Using existing bucket from SQL
+                .from('hair-requests') // Reverting to known bucket from SQL
                 .upload(path, formData, {
                     contentType: 'multipart/form-data',
                     upsert: true
@@ -107,7 +107,7 @@ export default function HairDonationScreen({ onBack, onSuccess }: HairDonationSc
                 user_id: user.id,
                 type: 'hair',
                 status: 'pending',
-                proof_url: proofPath,
+                proof_of_Donation: proofPath,
                 hair_length: hairLength,
                 hair_color: hairColor,
                 chemically_treated: chemicallyTreated,

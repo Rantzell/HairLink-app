@@ -40,6 +40,7 @@ export default function MonetaryDonationDashboard({ onBack, onSuccess, role = 'D
     const [fullName, setFullName] = useState('');
     const [numAmount, setNumAmount] = useState('');
     const [wordsAmount, setWordsAmount] = useState('');
+    const [referenceNumber, setReferenceNumber] = useState('');
     const [proofImage, setProofImage] = useState<string | null>(null);
     const [anonymous, setAnonymous] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -55,6 +56,7 @@ export default function MonetaryDonationDashboard({ onBack, onSuccess, role = 'D
     const pickImage = async () => {
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ['images'],
+            allowsEditing: true,
             quality: 0.8,
         });
 
@@ -63,16 +65,47 @@ export default function MonetaryDonationDashboard({ onBack, onSuccess, role = 'D
         }
     };
 
+    const uploadImage = async (uri: string, path: string) => {
+        try {
+            const formData = new FormData();
+            formData.append('file', {
+                uri,
+                name: 'payment_proof.jpg',
+                type: 'image/jpeg',
+            } as any);
+
+            const { data, error } = await supabase.storage
+                .from('Proof_of_Donation') // Matching the bucket in your screenshot
+                .upload(path, formData, {
+                    contentType: 'multipart/form-data',
+                    upsert: true
+                });
+
+            if (error) {
+                console.error('Storage upload error:', error);
+                if (error.message.includes('row-level security')) {
+                    console.error('CRITICAL: Storage RLS Policy is blocking the upload. Please check your Supabase Dashboard policies.');
+                }
+                return null;
+            }
+            return data?.path || null;
+        } catch (err) {
+            console.error('Upload exception:', err);
+            return null;
+        }
+    };
+
   const handleDonate = async () => {
     setSubmitError(null);
-    if (!fullName || !numAmount || !proofImage) {
-      setSubmitError('Please provide your name, amount, and upload a proof of payment.');
+    if (!fullName || !numAmount || !proofImage || !referenceNumber) {
+      const msg = 'Please provide your name, amount, reference number, and upload a proof of payment.';
+      setSubmitError(msg);
+      Alert.alert('Missing Fields', msg);
       return;
     }
 
     setLoading(true);
     try {
-      // Use getUser() — more reliable in React Native than getSession()
       const { data: { user }, error: userError } = await supabase.auth.getUser();
 
       if (userError || !user) {
@@ -80,21 +113,43 @@ export default function MonetaryDonationDashboard({ onBack, onSuccess, role = 'D
         return;
       }
       
+      const timestamp = Date.now();
+      const proofPath = await uploadImage(proofImage, `${user.id}/monetary_${timestamp}.jpg`);
+      
+      if (!proofPath) {
+        setSubmitError('Could not upload proof of payment. Please try again.');
+        return;
+      }
+
       const { error } = await supabase
-        .from('donations')
+        .from('monetary_donations') // Using the table name from your screenshot
         .insert({
           user_id: user.id,
-          type: 'monetary',
-          full_name: fullName,
+          name: fullName,       // Changed from full_name to name
           amount: parseFloat(numAmount),
-          words_amount: wordsAmount,
+          currency: 'PHP',     // Added currency from your screenshot
+          payment_method: paymentMethod,
+          reference_number: referenceNumber, // Added to fix not-null constraint
           status: 'pending',
-          proof_url: proofImage, 
+          proof_of_donation: proofPath, 
         });
 
       if (error) {
         setSubmitError(`${error.message} (code: ${error.code})`);
+        Alert.alert('Submission Error', error.message);
         return;
+      }
+
+      // ── Send Notification ────────────────────────────────
+      try {
+          await supabase.from('notifications').insert({
+              user_id: user.id,
+              title: 'Donation Received! 💖',
+              message: `Thank you for your donation of ₱${numAmount}. We are reviewing your proof of payment.`,
+              type: 'donation'
+          });
+      } catch (nErr) {
+          console.warn('Notification failed:', nErr);
       }
 
       const donationAmount = parseFloat(numAmount);
@@ -240,6 +295,11 @@ export default function MonetaryDonationDashboard({ onBack, onSuccess, role = 'D
                     <Text style={styles.formLabel}>Amount of Donation (in words) *</Text>
                     <View style={[styles.inputBox, { borderColor: themeLight }]}>
                         <TextInput style={styles.input} placeholder="Ex. Ten thousand pesos" placeholderTextColor="#aaa" value={wordsAmount} onChangeText={setWordsAmount} />
+                    </View>
+
+                    <Text style={styles.formLabel}>Reference Number *</Text>
+                    <View style={[styles.inputBox, { borderColor: themeLight }]}>
+                        <TextInput style={styles.input} placeholder="Ex. 123456789" placeholderTextColor="#aaa" value={referenceNumber} onChangeText={setReferenceNumber} />
                     </View>
 
                     <Text style={styles.formLabel}>Proof of Donation *</Text>

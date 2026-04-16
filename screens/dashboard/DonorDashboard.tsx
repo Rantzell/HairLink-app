@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { StatusBar } from 'expo-status-bar';
 
 import {
   View,
@@ -10,7 +11,6 @@ import {
   Alert,
   Linking,
 } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { s, vs, ms } from '../../lib/scaling';
 import { Ionicons, MaterialCommunityIcons, Feather } from '@expo/vector-icons';
@@ -51,13 +51,18 @@ const ScaleButton = ({ children, onPress, style }: any) => {
   }));
 
   return (
-    <Animated.View style={[animatedStyle, style]}>
+    <Animated.View style={[
+      animatedStyle, 
+      style?.flex ? { flex: style.flex } : {},
+      style?.margin ? { margin: style.margin } : {}, 
+      style?.alignSelf ? { alignSelf: style.alignSelf } : {}
+    ]}>
       <TouchableOpacity
         activeOpacity={0.8}
         onPress={onPress}
         onPressIn={() => (scale.value = withSpring(0.96, { damping: 10, stiffness: 200 }))}
         onPressOut={() => (scale.value = withSpring(1))}
-        style={styles.scaleButtonInner}
+        style={[styles.scaleButtonInner, style, { margin: 0, alignSelf: undefined, flex: style?.flex ? 1 : undefined }]}
       >
         {children}
       </TouchableOpacity>
@@ -101,20 +106,20 @@ export default function DonorDashboard({ onLogout, onRoleChange, userName = "Don
       // 1. Fetch Approved Donations for Points
       const { data: donations, error: donationsError } = await supabase
         .from('donations')
-        .select('type, amount')
+        .select('amount')
         .eq('user_id', session.user.id)
         .eq('status', 'approved');
 
       if (donationsError) throw donationsError;
 
       let total = 0;
-      donations.forEach((d) => {
-        if (d.type === 'hair') {
-          total += 10;
-        } else if (d.type === 'monetary') {
-          total += Math.floor(d.amount / 100);
-        }
-      });
+      if (donations && Array.isArray(donations)) {
+        donations.forEach((d) => {
+          // Safety check for missing amount column
+          const donationAmount = d.amount || 0;
+          total += Math.floor(donationAmount / 100);
+        });
+      }
       setStarPoints(total);
 
       // 2. Fetch Referral Code from Profile
@@ -289,11 +294,12 @@ export default function DonorDashboard({ onLogout, onRoleChange, userName = "Don
       </Animated.View>
 
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        style={{ width: '100%' }}
+        contentContainerStyle={[styles.scrollContent, { alignItems: 'stretch' }]}
         showsVerticalScrollIndicator={false}
       >
         {/* ── Hero ──────────────────────────────────── */}
-        <Animated.View entering={FadeInDown.springify().delay(100)}>
+        <Animated.View entering={FadeInDown.springify().delay(100)} style={{ width: '100%' }}>
           <LinearGradient
             colors={['#FFF0F8', '#FFD6EF']}
             start={{ x: 0, y: 0 }}
@@ -836,8 +842,6 @@ const styles = StyleSheet.create({
   },
 
   scaleButtonInner: {
-    width: '100%',
-    height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
   },

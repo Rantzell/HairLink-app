@@ -82,28 +82,30 @@ export default function RecipientCalendarScreen({ onBack }: { onBack?: () => voi
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
-      // Fetch both donations and hair requests simultaneously
-      const [donationsResult, requestsResult] = await Promise.all([
+      // Fetch donations, hair requests, and monetary donations
+      const [donationsResult, requestsResult, monetaryResult] = await Promise.all([
         supabase.from('donations').select('*').eq('user_id', session.user.id),
-        supabase.from('hair_requests').select('*').eq('user_id', session.user.id)
+        supabase.from('hair_requests').select('*').eq('user_id', session.user.id),
+        supabase.from('monetary_donations').select('*').eq('user_id', session.user.id)
       ]);
 
       if (donationsResult.error) throw donationsResult.error;
       if (requestsResult.error) throw requestsResult.error;
+      if (monetaryResult.error) throw monetaryResult.error;
 
-      // Map donations to Events
+      // Map hair donations
       const mappedDonations: Event[] = (donationsResult.data || []).map((d: any) => ({
         id: d.id,
-        title: d.type === 'hair' ? 'Hair Donation' : `Monetary Support (₱${d.amount})`,
-        location: d.type === 'hair' ? 'Strand-by-Strand' : 'Financial Aid',
+        title: 'Hair Donation',
+        location: 'Strand-by-Strand',
         time: new Date(d.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         date: d.created_at.split('T')[0],
-        type: d.type === 'hair' ? 'drive' : 'other', 
+        type: 'drive', 
         accepted: d.status === 'approved',
         status: d.status
       }));
 
-      // Map hair requests to Events
+      // Map hair requests
       const mappedRequests: Event[] = (requestsResult.data || []).map((h: any) => ({
         id: h.id,
         title: 'Hair Request',
@@ -115,7 +117,19 @@ export default function RecipientCalendarScreen({ onBack }: { onBack?: () => voi
         status: h.status
       }));
 
-      setEvents([...mappedDonations, ...mappedRequests]);
+      // Map monetary donations
+      const mappedMonetary: Event[] = (monetaryResult.data || []).map((m: any) => ({
+        id: m.id,
+        title: `Financial Support (₱${m.amount})`,
+        location: m.payment_method || 'Monetary Aid',
+        time: new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        date: m.created_at.split('T')[0],
+        type: 'other', 
+        accepted: m.status === 'approved',
+        status: m.status
+      }));
+
+      setEvents([...mappedDonations, ...mappedRequests, ...mappedMonetary]);
     } catch (err) {
       console.error("Error fetching calendar events:", err);
     } finally {
